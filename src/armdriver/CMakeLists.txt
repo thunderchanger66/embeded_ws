@@ -25,22 +25,6 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-#find_package(serial REQUIRED)
-
-set(msg_files
-  "msg/ArmTargetPosition.msg"
-  "msg/ArmTarget.msg"
-  "msg/ColorIkResult.msg"
-  "msg/FourArmPosition.msg"
-  "msg/PickAndPut.msg"
-  "msg/PositionColor.msg"
-  "msg/SixArmPosition.msg"
-)
-rosidl_generate_interfaces(${PROJECT_NAME}
-  ${msg_files}
-  DEPENDENCIES std_msgs geometry_msgs sensor_msgs
-)
 
 add_executable(armdriver_node
   src/armdriver.cpp

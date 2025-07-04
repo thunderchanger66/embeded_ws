@@ -7,4 +7,4 @@
 2.armdriver中的msg不需要管  
 
 ros2 run armdriver armdriver_node //机械驱动  
-ros2 launch ros2 launch armmodel_moveit_config demo.launch.py
+ros2 launch ros2 launch armmodel_moveit_config demo.launch.py //moveit-rviz测试
