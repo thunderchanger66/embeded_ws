@@ -1,0 +1,25 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: armmodel
+    relative_path: urdf/armmodel.urdf
+  srdf:
+    relative_path: config/armmodel.srdf
+  package_settings:
+    author_name: Thunder
+    author_email: jhw82588@gmail.com
+    generated_timestamp: 1751619816
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity

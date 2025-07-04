@@ -295,32 +295,82 @@ void TurnOnRobot::Cmd_Vel_Callback(const geometry_msgs::msg::Twist::SharedPtr tw
 Date: May 31, 2020
 Function: 订阅回调函数，根据订阅的指令向串口发指令控制下位机
 ***************************************/
+// void TurnOnRobot::joint_states_Callback(const sensor_msgs::msg::JointState::SharedPtr arm_joint)
+// {
+//     short transition;  // 中间变量
+//     Send_Data.tx[0] = FRAME_HEADER_ARM;  // 帧头 固定值
+
+//     // 遍历所有关节，将数据转换为字节并填充到 `Send_Data.tx` 数组中
+//     for (int i = 0; i < 6; ++i)
+//     {
+//         transition = arm_joint->position[i] * 1000;  // 将浮点数放大一千倍，简化传输
+//         Send_Data.tx[2 + 2 * i] = transition;  // 低字节
+//         Send_Data.tx[1 + 2 * i] = transition >> 8;  // 高字节
+//     }
+
+//     Send_Data.tx[13] = DEFAULT_MODE;
+//     Send_Data.tx[14] = Check_Sum(14, SEND_DATA_CHECK);  // 帧尾校验位
+//     Send_Data.tx[15] = FRAME_TAIL_ARM;  // 数据的最后一位是帧尾（固定值）
+
+//     try
+//     {
+//         write_to_serial_port(Send_Data.tx, sizeof(Send_Data.tx));  // 向串口发送数据
+//     }
+//     catch (const std::exception &e)
+//     {
+//         RCLCPP_ERROR(get_logger(), "Unable to send data through serial port");
+//     }
+// }
 void TurnOnRobot::joint_states_Callback(const sensor_msgs::msg::JointState::SharedPtr arm_joint)
 {
-    short transition;  // 中间变量
-    Send_Data.tx[0] = FRAME_HEADER_ARM;  // 帧头 固定值
+    short transition;
+    Send_Data.tx[0] = FRAME_HEADER_ARM;
 
-    // 遍历所有关节，将数据转换为字节并填充到 `Send_Data.tx` 数组中
+    // 定义你需要的关节顺序
+    std::vector<std::string> desired_order = {
+        "joint1", "joint2", "joint3", "joint4", "joint5", "joint6"
+    };
+
+    // 建立 name -> position 的映射
+    std::unordered_map<std::string, double> joint_map;
+    for (size_t i = 0; i < arm_joint->name.size(); ++i)
+    {
+        joint_map[arm_joint->name[i]] = arm_joint->position[i];
+    }
+
+    // 按固定顺序提取并转换发送
     for (int i = 0; i < 6; ++i)
     {
-        transition = arm_joint->position[i] * 1000;  // 将浮点数放大一千倍，简化传输
-        Send_Data.tx[2 + 2 * i] = transition;  // 低字节
-        Send_Data.tx[1 + 2 * i] = transition >> 8;  // 高字节
+        const std::string &joint_name = desired_order[i];
+
+        if (joint_map.count(joint_name) == 0)
+        {
+            RCLCPP_WARN(get_logger(), "Missing joint: %s", joint_name.c_str());
+            transition = 0;  // 缺失关节默认值
+        }
+        else
+        {
+            transition = static_cast<short>(joint_map[joint_name] * 1000);
+        }
+
+        Send_Data.tx[2 + 2 * i] = transition;         // 低字节
+        Send_Data.tx[1 + 2 * i] = transition >> 8;    // 高字节
     }
 
     Send_Data.tx[13] = DEFAULT_MODE;
-    Send_Data.tx[14] = Check_Sum(14, SEND_DATA_CHECK);  // 帧尾校验位
-    Send_Data.tx[15] = FRAME_TAIL_ARM;  // 数据的最后一位是帧尾（固定值）
+    Send_Data.tx[14] = Check_Sum(14, SEND_DATA_CHECK);
+    Send_Data.tx[15] = FRAME_TAIL_ARM;
 
     try
     {
-        write_to_serial_port(Send_Data.tx, sizeof(Send_Data.tx));  // 向串口发送数据
+        write_to_serial_port(Send_Data.tx, sizeof(Send_Data.tx));
     }
     catch (const std::exception &e)
     {
         RCLCPP_ERROR(get_logger(), "Unable to send data through serial port");
     }
 }
+
 
 void TurnOnRobot::arm_teleop_Callback(const sensor_msgs::msg::JointState::SharedPtr arm_joint)
 {

@@ -24,17 +24,17 @@ def generate_launch_description():
             default_value='',
             description='Robot model file'
         ),
-        Node(
-            package='joint_state_publisher_gui',
-            executable='joint_state_publisher_gui',
-            name='joint_state_publisher_gui'
-        ),
-        Node(
-            package='robot_state_publisher',
-            executable='robot_state_publisher',
-            name='robot_state_publisher',
-            parameters=[{'robot_description': open(urdf_file).read()}]
-        ),
+        # Node(
+        #     package='joint_state_publisher_gui',
+        #     executable='joint_state_publisher_gui',
+        #     name='joint_state_publisher_gui'
+        # ),
+        # Node(
+        #     package='robot_state_publisher',
+        #     executable='robot_state_publisher',
+        #     name='robot_state_publisher',
+        #     parameters=[{'robot_description': open(urdf_file).read()}]
+        # ),
         Node(
             package='rviz2',
             executable='rviz2',
